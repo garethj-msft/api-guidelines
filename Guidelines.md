@@ -100,11 +100,21 @@ This document establishes the guidelines Microsoft REST APIs SHOULD follow so RE
 		- [14.6    Receiving notifications](#146-receiving-notifications)
 		- [14.7    Managing subscriptions programmatically](#147-managing-subscriptions-programmatically)
 		- [14.8    Security](#148-security)
-	- [15    Unsupported requests](#15-unsupported-requests)
-		- [15.1    Essential guidance](#151-essential-guidance)
-		- [15.2    Feature allow list](#152-feature-allow-list)
-	- [16     Appendix](#16-appendix)
-		- [16.1    Sequence diagram notes](#161-sequence-diagram-notes)
+	- [15    Naming guidelines](#15-naming-guidelines)
+		- [15.1    Approach](#151-approach)
+		- [15.2    Casing](#152-casing)
+		- [15.3    Names to avoid](#153-names-to-avoid)
+		- [15.4    Forming compound names](#154-forming-compound-names)
+		- [15.5    Identity properties](#155-identity-properties)
+		- [15.6    Date and time properties](#156-date-and-time-properties)
+		- [15.7    Name properties](#157-name-properties)
+		- [15.8    Collections and counts](#158-collections-and-counts)
+		- [15.9    Common property names](#159-common-property-names)
+	- [16    Unsupported requests](#16-unsupported-requests)
+		- [16.1    Essential guidance](#161-essential-guidance)
+		- [16.2    Feature allow list](#162-feature-allow-list)
+	- [17     Appendix](#16-appendix)
+		- [17.1    Sequence diagram notes](#171-sequence-diagram-notes)
 	
 
 <!-- /TOC -->
@@ -1744,13 +1754,99 @@ Furthermore, services that allow client defined HTTP web hooks callback URLs SHO
 
 For example, services may not want to require developers to generate certificates to onboard. Services might only enable this on test accounts.  
 
-## 15 Unsupported requests
+## 15 Naming guidelines
+### 15.1 Approach
+Naming policies should aid developers in discovering functionality without having to constantly refer to documentation.
+Use of common patterns and standard conventions greatly aids developers in correctly guessing common property names and meanings.
+Services SHOULD use verbose naming patterns and SHOULD NOT use abbreviations other than acronyms that are the dominant mode of expression in the domain being represented by the API, (e.g. Url).
+
+### 15.2 Casing
+- Service URLS MUST be case-insensitive, except where the service is manipulating data that itself is case-sensitive. 
+- Acronyms SHOULD follow the casing conventions as though they were regular words (e.g. Url).
+- All identifiers including namespaces, entityTypes, entitySets, properties, actions, functions and enumeration values SHOULD use lowerCamelCase.
+
+### 15.3 Names to avoid
+Certain names are so overloaded in API domains that they lose all meaning or clash with other common usages in domains that cannot be avoided when using REST APIs, such as OAUTH.
+Services SHOULD NOT use the following names:
+- Context
+- Scope
+- Resource
+ 
+### 15.4 Forming compound names
+- Services SHOULD avoid using articles such as 'a', 'the', 'of' unless needed to convey meaning.
+	- e.g. names such as aUser, theAccount, countOfBooks SHOULD NOT be used, rather user, account, bookCount SHOULD be preferred.
+- Services SHOULD add a type to a property name when not doing so would cause ambiguity about how the data is represented or would cause the service not to use a common property name.
+- When adding a type to a property name, services MUST add the type at the end, e.g. createdDateTime.
+
+### 15.5 Identity properties
+- Services MUST use string types for identity properties.
+- For OData services, the service MUST use the OData @id property to represent the canonical identifier of the resource.
+- Services MAY use the simple 'id' property to represent a local or legacy primary key value for a resource.
+- Services SHOULD use the name of the relationship postfixed with 'Id' to represent a foreign key to another resource, e.g. subscriptionId.
+	- The content of this property SHOULD be the canonical ID of the referenced resource.
+
+### 15.6 Date and time properties
+
+- For properties requiring both date and time, services MUST use the suffix 'DateTime'.
+- For properties requiring only date information without specifying time, services MUST use the suffix 'Date', e.g. birthDate. 
+- For properties requiring only time information without specifying date, services MUST use the suffix 'Time', e.g. appointmentStartTime.
+
+### 15.7 Name properties
+- For the overall name of a resource typically shown to users, services MUST use the property name 'displayName'.
+- Services MAY use other common naming properties, e.g. givenName, surname, signInName.
+
+### 15.8 Collections and counts
+- Services MUST name collections as plural nouns or plural noun phrases using correct English. Services MAY use simplified English for nouns that have plurals not in common verbal usage.
+	- e.g. schemas MAY be used instead of schemata.
+- Services MUST name counts of resources with a noun or noun phrase suffixed with 'Count'.
+
+### 15.9 Common property names
+Where services have a property whose data matches the names below, the service MUST use the name from this table.
+
+| |
+|------------- |
+ attendees     | 
+ body          |  
+ createdDateTime |
+ childCount    |  
+ children      |  
+ contentUrl    |  
+ country       |  
+ createdBy     |  
+ displayName   |
+ errorUrl      |
+ eTag          |
+ event         |
+ expirationDateTime |
+ givenName     |
+ jobTitle      |
+ kind          |  
+ idlastModifiedDateTime |
+ location      |
+ memberOf      |
+ message       |
+ name          |  
+ owner         |
+ people        |  
+ person        |  
+ postalCode    | 
+ photo         | 
+ preferredLanguage | 
+ properties    |
+ signInName    |
+ surname       |
+ tags          |
+ userPrincipalName | 
+ webUrl        |
+ 
+
+## 16 Unsupported requests
 RESTful API clients MAY request functionality that is currently unsupported. RESTful APIs MUST respond to valid but unsupported requests consistent with this section.
 
-### 15.1 Essential guidance
+### 16.1 Essential guidance
 RESTful APIs will often choose to limit functionality that can be performed by clients. For instance, auditing systems allow records to be created but not modified or deleted. Similarly, some APIs will expose collections but require or otherwise limit filtering and ordering criteria, or MAY not support client-driven pagination.
 
-### 15.2 Feature allow list
+### 16.2 Feature allow list
 If a service does not support any of the below API features, then an error response MUST be provided if the feature is requested by a caller. The features are:
 - Key Addressing in a collection, such as: `https://api.contoso.com/v1.0/people/user1@contoso.com`
 - Filtering a collection by a property value, such as: `https://api.contoso.com/v1.0/people?$filter=name eq 'david'`
@@ -1759,7 +1855,7 @@ If a service does not support any of the below API features, then an error respo
 - Sorting by $orderBy, such as: `https://api.contoso.com/v1.0/people?$orderBy=name desc`
 - Providing $delta tokens, such as: `https://api.contoso.com/v1.0/people?$delta`
 
-#### 15.2.1 Error response
+#### 16.2.1 Error response
 Services MUST provide an error response if a caller requests an unsupported feature found in the feature allow list. The error response MUST be an HTTP status code from the 4xx series, indicating that the request cannot be fulfilled. Unless a more specific error status is appropriate for the given request, services SHOULD return "400 Bad Request" and an error payload conforming to the error response guidance provided in the Microsoft REST API Guidelines. Services SHOULD include enough detail in the response message for a developer to determine exactly what portion of the request is not supported.
 
 Example:
@@ -1781,11 +1877,11 @@ Content-Type: application/json
 }
 ```
 
-## 16 Appendix
-### 16.1 Sequence diagram notes
+## 17 Appendix
+### 17.1 Sequence diagram notes
 All sequence diagrams in this document are generated using the WebSequenceDiagrams.com web site. To generate them, paste the text below into the web tool.
 
-#### 16.1.1 Push notifications, per user flow
+#### 17.1.1 Push notifications, per user flow
 
 ```
 === Being Text ===
@@ -1840,7 +1936,7 @@ note right of App Server: Update status and cache new "since" token
 === End Text ===
 ```
 
-#### 16.1.2 Push notifications, firehose flow
+#### 17.1.2 Push notifications, firehose flow
 
 ```
 === Being Text ===
